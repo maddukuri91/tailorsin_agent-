@@ -153,9 +153,7 @@ def _has_tool_error(state_before: dict, result: dict) -> bool:
     return False
 def _had_verified_tool_success(state_before: dict, result: dict) -> bool:
     """True only when the latest turn has a verified CRM success payload."""
-    if result.get("completed") and _extract_crm_success_message(
-        result.get("api_result")
-    ):
+    if result.get("completed") and _is_success_result(result.get("api_result")):
         return True
     from_count = len(state_before["messages"])
     for message in result["messages"][from_count:]:
@@ -179,11 +177,19 @@ async def _handle_menu_choice(
         return [OutgoingMessage(text="Oops — that's not on the menu 🤔 Try one of the buttons above 👆")]
     if action["action"] == "agent":
         # Hand the intent to the supervisor agent -> sub-agents.
+        forced_agent = {
+            "register": "signup",
+            "fabric_estimation": "fabric_estimation",
+            "bulk_order": "bulk_order",
+            "appointment": "book_visit",
+            "talk_to_human": "human_support",
+        }.get(action.get("intent"))
         return await _run_agent_turn(
             session_id=session_id,
             ctx=ctx,
             user_text=action["prompt"],
             fresh=True,
+            forced_agent=forced_agent,
         )
     if action["action"] == "content":
         # Curated onboarding copy — sent RAW (already Telegram Markdown).
@@ -386,7 +392,15 @@ async def _refresh_after_registration(
         # Fresh state keeps the next turn from continuing inside signup.
         _conversations[session_id] = _fresh_state()
     client_menu = _build_menu_reply(menu_router.get_menu(ctx.current_menu_id))
-    return [*replies, client_menu]
+    success_message = _extract_crm_success_message(result.get("api_result"))
+    confirmation = success_message or (
+        "🎉 Registration successful! Welcome to Tailorsin. "
+        "You can now choose what you would like to do next:"
+    )
+    # Do not forward the signup model's final text here. The registration
+    # result is already verified, so send one deterministic confirmation and
+    # then the refreshed client menu.
+    return [OutgoingMessage(text=_escape_markdown(confirmation)), client_menu]
 
 
 async def _run_agent_turn(
@@ -394,6 +408,7 @@ async def _run_agent_turn(
     ctx,
     user_text: str,
     fresh: bool = False,
+    forced_agent: Optional[str] = None,
 ) -> List[OutgoingMessage]:
     """
     Feed a human message through the supervisor agent -> sub-agents (the
@@ -409,6 +424,8 @@ async def _run_agent_turn(
         state = _fresh_state()
     else:
         state = dict(prior_state)
+    if forced_agent:
+        state["next_agent"] = forced_agent
     base_messages = list(state["messages"])
     if context_message is not None:
         base_messages = [context_message] + base_messages

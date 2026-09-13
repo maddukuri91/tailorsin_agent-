@@ -63,6 +63,20 @@ human_support
 def supervisor_node(state: AgentState):
 
     messages = state["messages"]
+    active_agents = {
+        "signup",
+        "bulk_order",
+        "fabric_estimation",
+        "book_visit",
+        "human_support",
+    }
+
+    # Once a menu selection has started an agent flow, every subsequent
+    # customer detail belongs to that same flow. Do not ask the supervisor
+    # LLM to classify a name, phone number, date, or other follow-up again.
+    prior_agent = state.get("next_agent")
+    if prior_agent in active_agents:
+        return {"next_agent": prior_agent}
 
     # The newest customer line in this service always starts with
     # "REFERENCE_PICTURE_URL:" (photo turn) or "NEW CUSTOMER MESSAGE:"
@@ -88,8 +102,7 @@ def supervisor_node(state: AgentState):
     bare = detail and detail.split()[0].rstrip(",").isdigit()
     if bare:
         prior = state.get("next_agent")
-        if prior in {"signup", "bulk_order", "fabric_estimation",
-                     "book_visit", "human_support"}:
+        if prior in active_agents:
             return {"next_agent": prior}
         served = None
         for message in reversed(messages or []):
@@ -98,8 +111,7 @@ def supervisor_node(state: AgentState):
             ) else ""
             if not msg_text or "currently_serving" not in msg_text:
                 continue
-            for agent_name in ("signup", "bulk_order", "fabric_estimation",
-                               "book_visit", "human_support"):
+            for agent_name in active_agents:
                 if agent_name in msg_text:
                     served = agent_name
                     break

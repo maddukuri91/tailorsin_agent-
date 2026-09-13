@@ -16,6 +16,7 @@ from agents._utils import (
     looks_like_success_claim,
     validate_tool_args,
 )
+from agents.signup import _latest_signup_name
 from services.conversation_service import (
     _build_replies,
     _had_verified_tool_success,
@@ -145,6 +146,28 @@ def test_verified_success_surfaces_friendly_message():
     assert all("status" not in r.text for r in replies)
 
 
+def test_verified_success_without_crm_message_is_not_generic_retry():
+    before = {
+        "messages": [HumanMessage(content="hi")],
+        "completed": False,
+        "api_result": None,
+    }
+    result = {
+        "messages": before["messages"]
+        + [
+            ToolMessage(
+                content=json.dumps({"status": "success", "type": "client"}),
+                tool_call_id="call-1",
+            )
+        ],
+        "completed": True,
+        "api_result": {"status": "success", "type": "client"},
+    }
+    replies = _build_replies(before, result)
+    assert replies
+    assert "not sure I caught" not in replies[0].text.lower()
+
+
 def test_generic_success_fallback_only_on_verified_success():
     before = {
         "messages": [HumanMessage(content="hi")],
@@ -191,3 +214,11 @@ def test_looks_like_success_claim():
 def test_validate_tool_args_still_rejects_missing_details():
     ok, hint = validate_tool_args("register_client", {"client_name": "  "}, ["client_name"])
     assert ok is False and "client_name" in hint
+
+
+def test_signup_recovers_name_from_follow_up_message():
+    messages = [
+        HumanMessage(content="NEW CUSTOMER MESSAGE:\nI want to register as a new Tailorsin client."),
+        HumanMessage(content="NEW CUSTOMER MESSAGE:\nRamakrishna G"),
+    ]
+    assert _latest_signup_name(messages) == "Ramakrishna G"
