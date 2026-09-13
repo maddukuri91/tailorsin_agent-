@@ -6,32 +6,32 @@
 # intent, which the conversation service routes accordingly.
 
 COMMON_OPTIONS: list[dict[str, str]] = [
-    {"label": "Get a fabric estimate",     "intent": "fabric_estimation"},
-    {"label": "Bulk / wholesale enquiry",  "intent": "bulk_order"},
-    {"label": "Talk to our team",          "intent": "talk_to_human"},
+    {"label": "Custom fabric estimation",      "intent": "fabric_estimation"},
+    {"label": "Bulk order enquiry",            "intent": "bulk_order"},
+    {"label": "Talk to our team",              "intent": "talk_to_human"},
 ]
 
 SEGMENT_MENU_OPTIONS: dict[str, list[dict[str, str]]] = {
 
     "active_client": [
-        {"label": "Track my current order",      "intent": "order_status"},
-        {"label": "Modify my order",             "intent": "order_changes"},
-        {"label": "Cancel my order",             "intent": "order_cancel"},
-        {"label": "Place a new order / Pickup",  "intent": "new_order"},
+        {"label": "Track an order",            "intent": "order_status"},
+        {"label": "Modify an order",           "intent": "order_changes"},
+        {"label": "Cancel an order",           "intent": "order_cancel"},
+        {"label": "Place an order",            "intent": "new_order"},
         *COMMON_OPTIONS,
     ],
 
     "client": [
-        {"label": "Place an order",     "intent": "new_order"},
-        {"label": "Book a store visit",     "intent": "appointment"},
-        {"label": "Drop off fabric at store",    "intent": "fabric_delivery"},
+        {"label": "Place an order",            "intent": "new_order"},
+        {"label": "Book a store visit",        "intent": "appointment"},
+        {"label": "Price catalogue",           "intent": "price_catalogue"},
         *COMMON_OPTIONS,
     ],
 
     "new_user": [
-        {"label": "How it works",       "intent": "how_it_works"},
-        {"label": "Price catalogue",    "intent": "price_catalogue"},
-        {"label": "Place an order",     "intent": "register"},
+        {"label": "How it works",              "intent": "how_it_works"},
+        {"label": "Price catalogue",           "intent": "price_catalogue"},
+        {"label": "Place an order",            "intent": "register"},
     ],
 }
 
