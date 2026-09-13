@@ -1,0 +1,4 @@
+# local secrets — never commit
+.env
+__pycache__/
+.pytest_cache/
