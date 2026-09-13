@@ -5,15 +5,17 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 
 from agents._utils import (
+    context_mobile,
     execute_tool_call,
     extract_success_message,
     generate_agent_replies,
     is_success_result,
     is_tool_failure_content,
     looks_like_success_claim,
+    resolve_primary_contact,
     validate_tool_args,
 )
 from agents.signup import _latest_signup_name
@@ -222,3 +224,27 @@ def test_signup_recovers_name_from_follow_up_message():
         HumanMessage(content="NEW CUSTOMER MESSAGE:\nRamakrishna G"),
     ]
     assert _latest_signup_name(messages) == "Ramakrishna G"
+
+
+def test_signup_contact_resolution_returns_phone_and_history_separately():
+    messages = [
+        SystemMessage(
+            content=(
+                "Customer context for this conversation:\n"
+                "mobile: 919640864111"
+            )
+        ),
+        HumanMessage(content="NEW CUSTOMER MESSAGE:\nRamakrishna G"),
+    ]
+    args = {"client_name": "Ramakrishna G"}
+    history = resolve_primary_contact(args, messages)
+    assert context_mobile(messages) == "919640864111"
+    assert args["primary_no"] == "919640864111"
+    assert "Ramakrishna G" in history
+    ok, hint = validate_tool_args(
+        "register_client",
+        args,
+        ["client_name", "primary_no"],
+        history=history,
+    )
+    assert ok is True and hint is None

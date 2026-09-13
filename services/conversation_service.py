@@ -424,6 +424,12 @@ async def _run_agent_turn(
         state = _fresh_state()
     else:
         state = dict(prior_state)
+    # Keep the verified Telegram contact in graph state as well as the
+    # injected prompt. Tool validation must not depend on the LLM preserving
+    # a system-message detail in its trace.
+    if ctx and ctx.mobile:
+        state["mobile"] = ctx.mobile
+        state["primary_no"] = ctx.mobile
     if forced_agent:
         state["next_agent"] = forced_agent
     base_messages = list(state["messages"])
