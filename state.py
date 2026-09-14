@@ -21,6 +21,10 @@ class AgentState(TypedDict):
     bookdate: Optional[str]
     booktime: Optional[str]
 
+    # order flow
+    order_action: Optional[str]
+    address_id: Optional[int]
+
     # API result
     api_result: Optional[dict]
 

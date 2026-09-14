@@ -25,6 +25,12 @@ class MenuRouter:
     def get_menu(self, menu_id: str) -> Dict[str, Any]:
         return menu_for(menu_id)
 
+    def register_menu(self, menu_id: str, menu: Dict[str, Any]) -> None:
+        """Register a short-lived menu, such as a customer's saved addresses."""
+        from services import segments
+
+        segments.MENUS[menu_id] = menu
+
     def resolve(self, menu_id: str, choice: int) -> Dict[str, Any]:
         """
         Map a 1-based menu index (within the given menu) to an action.

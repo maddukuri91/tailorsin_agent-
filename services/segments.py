@@ -6,32 +6,32 @@
 # intent, which the conversation service routes accordingly.
 
 COMMON_OPTIONS: list[dict[str, str]] = [
-    {"label": "Custom fabric estimation",      "intent": "fabric_estimation"},
-    {"label": "Bulk order enquiry",            "intent": "bulk_order"},
-    {"label": "Talk to our team",              "intent": "talk_to_human"},
+    {"label": "📏 Custom fabric estimate",      "intent": "fabric_estimation"},
+    {"label": "📦 Bulk order enquiry",           "intent": "bulk_order"},
+    {"label": "🧑‍💼 Talk to our team",            "intent": "talk_to_human"},
 ]
 
 SEGMENT_MENU_OPTIONS: dict[str, list[dict[str, str]]] = {
 
     "active_client": [
-        {"label": "Track an order",            "intent": "order_status"},
-        {"label": "Modify an order",           "intent": "order_changes"},
-        {"label": "Cancel an order",           "intent": "order_cancel"},
-        {"label": "Place an order",            "intent": "new_order"},
+        {"label": "🔍 Track an order",          "intent": "order_status"},
+        {"label": "✏️ Modify an order",         "intent": "order_changes"},
+        {"label": "❌ Cancel an order",         "intent": "order_cancel"},
+        {"label": "🛍️ Place an order",          "intent": "new_order"},
         *COMMON_OPTIONS,
     ],
 
     "client": [
-        {"label": "Place an order",            "intent": "new_order"},
-        {"label": "Book a store visit",        "intent": "appointment"},
-        {"label": "Price catalogue",           "intent": "price_catalogue"},
+        {"label": "🛍️ Place an order",          "intent": "new_order"},
+        {"label": "📅 Book a store visit",      "intent": "appointment"},
+        {"label": "💸 Price catalogue",         "intent": "price_catalogue"},
         *COMMON_OPTIONS,
     ],
 
     "new_user": [
-        {"label": "How it works",              "intent": "how_it_works"},
-        {"label": "Price catalogue",           "intent": "price_catalogue"},
-        {"label": "Place an order",            "intent": "register"},
+        {"label": "✨ How it works",            "intent": "how_it_works"},
+        {"label": "💸 Price catalogue",         "intent": "price_catalogue"},
+        {"label": "🛍️ Place an order",          "intent": "register"},
     ],
 }
 
@@ -132,20 +132,20 @@ MENUS["new_user_root"] = {
     "title": SEGMENT_TITLES["new_user"],
     "options": [
         {
-            "label": "How it works",
+            "label": "✨ How it works",
             "intent": "how_it_works",
             "action": "content",
             "blocks": [TAILORSIN_ABOUT],
             "next": "new_user_how_it_works",
         },
         {
-            "label": "Price catalogue",
+            "label": "💸 Price catalogue",
             "intent": "price_catalogue",
             "action": "content",
             "blocks": [TAILORSIN_PRICE_CATALOGUE],
             "next": "new_user_price_catalogue",
         },
-        _menu_option({"label": "Place an order", "intent": "register"}),
+        _menu_option({"label": "🛍️ Place an order", "intent": "register"}),
     ],
 }
 
@@ -153,13 +153,13 @@ MENUS["new_user_how_it_works"] = {
     "title": "What would you like to explore next?",
     "options": [
         {
-            "label": "Price catalogue",
+            "label": "💸 Price catalogue",
             "intent": "price_catalogue",
             "action": "content",
             "blocks": [TAILORSIN_PRICE_CATALOGUE],
             "next": "new_user_price_catalogue",
         },
-        _menu_option({"label": "Place an order", "intent": "register"}),
+        _menu_option({"label": "🛍️ Place an order", "intent": "register"}),
     ],
 }
 
@@ -167,16 +167,42 @@ MENUS["new_user_price_catalogue"] = {
     "title": "Choose an option to continue:",
     "options": [
         _menu_option({
-            "label": "Custom fabric estimation",
+            "label": "📏 Custom fabric estimate",
             "intent": "fabric_estimation",
         }),
         _menu_option({
-            "label": "Bulk order enquiry",
+            "label": "📦 Bulk order enquiry",
             "intent": "bulk_order",
         }),
-        _menu_option({"label": "Place an order", "intent": "register"}),
+        _menu_option({"label": "🛍️ Place an order", "intent": "register"}),
     ],
 }
+
+MENUS["client_order_root"] = {
+    "title": "🛍️ How would you like to place your order?",
+    "options": [
+        {
+            "label": "🚚 Schedule a pickup",
+            "intent": "schedule_pickup",
+            "action": "lookup_addresses",
+        },
+        {
+            "label": "🏬 Send fabric to store",
+            "intent": "ship_fabric",
+            "action": "agent",
+            "prompt": "I want to send my fabric to a Tailorsin store.",
+        },
+    ],
+}
+
+for _menu_name in ("client_root", "active_client_root"):
+    for _client_option in MENUS[_menu_name]["options"]:
+        if _client_option.get("intent") == "new_order":
+            _client_option.update({
+                "action": "content",
+                "next": "client_order_root",
+                "blocks": [],
+            })
 
 
 def root_menu_id(customer_type: str) -> str:

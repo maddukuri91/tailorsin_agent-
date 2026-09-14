@@ -69,6 +69,7 @@ def supervisor_node(state: AgentState):
         "fabric_estimation",
         "book_visit",
         "human_support",
+        "order",
     }
 
     # Once a menu selection has started an agent flow, every subsequent
@@ -133,7 +134,8 @@ def supervisor_node(state: AgentState):
         "bulk_order",
         "fabric_estimation",
         "book_visit",
-        "human_support"
+        "human_support",
+        "order"
     }:
         route = "signup"
 

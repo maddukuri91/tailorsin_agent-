@@ -10,6 +10,7 @@ from agents.bulk_order import bulk_order_agent
 from agents.fabric_estimation import fabric_estimation_agent
 from agents.book_visit import book_visit_agent
 from agents.human_support import human_support_agent
+from agents.order import order_agent
 
 
 def route_from_supervisor(state: AgentState):
@@ -51,6 +52,11 @@ builder.add_node(
     human_support_agent
 )
 
+builder.add_node(
+    "order",
+    order_agent
+)
+
 
 # Entry
 builder.add_edge(
@@ -69,6 +75,7 @@ builder.add_conditional_edges(
         "fabric_estimation": "fabric_estimation",
         "book_visit": "book_visit",
         "human_support": "human_support"
+        ,"order": "order"
     }
 )
 
@@ -96,6 +103,11 @@ builder.add_edge(
 
 builder.add_edge(
     "human_support",
+    END
+)
+
+builder.add_edge(
+    "order",
     END
 )
 
