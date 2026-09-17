@@ -41,6 +41,20 @@ Route the user request to exactly one of these agents:
    - talking to a human / human support
    - human handover
 
+6. order
+   - scheduling a fabric pickup
+   - shipping fabric to a store
+   - adding a client address
+   - NEW orders (placing a fresh order)
+
+7. order_management
+   - TRACKING an existing order (checking order status)
+   - CANCELING an existing order
+   - MODIFYING/CHANGING an existing order
+   - "where is my order", "track my order", "check order status"
+   - "cancel my order", "I want to cancel"
+   - "modify my order", "change my order", "update my order"
+
 If the customer is already being served by one agent (see
 "currently_serving") and the newest customer line is just a bare detail for
 that request — a phone number or a name — KEEP routing to that same
@@ -50,6 +64,12 @@ number or name.
 Also always respect an explicit "currently_serving: <agent>" line in the
 conversation: it names the in-progress agent.
 
+Key distinction:
+- If the customer wants to CREATE a new order (schedule pickup, ship fabric),
+  route to "order".
+- If the customer wants to manage an EXISTING order (track, cancel, modify),
+  route to "order_management".
+
 Return ONLY one of:
 
 signup
@@ -57,6 +77,8 @@ bulk_order
 fabric_estimation
 book_visit
 human_support
+order
+order_management
 """
 
 
@@ -70,6 +92,7 @@ def supervisor_node(state: AgentState):
         "book_visit",
         "human_support",
         "order",
+        "order_management",
     }
 
     # Once a menu selection has started an agent flow, every subsequent
@@ -135,7 +158,8 @@ def supervisor_node(state: AgentState):
         "fabric_estimation",
         "book_visit",
         "human_support",
-        "order"
+        "order",
+        "order_management",
     }:
         route = "signup"
 

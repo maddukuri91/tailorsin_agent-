@@ -14,10 +14,10 @@ COMMON_OPTIONS: list[dict[str, str]] = [
 SEGMENT_MENU_OPTIONS: dict[str, list[dict[str, str]]] = {
 
     "active_client": [
-        {"label": "🔍 Track an order",          "intent": "order_status"},
-        {"label": "✏️ Modify an order",         "intent": "order_changes"},
-        {"label": "❌ Cancel an order",         "intent": "order_cancel"},
+        {"label": "📋 Order Management",        "intent": "order_management"},
         {"label": "🛍️ Place an order",          "intent": "new_order"},
+        {"label": "📅 Book a store visit",      "intent": "appointment"},
+        {"label": "💸 Price catalogue",         "intent": "price_catalogue"},        
         *COMMON_OPTIONS,
     ],
 
@@ -195,12 +195,42 @@ MENUS["client_order_root"] = {
     ],
 }
 
+MENUS["active_client_order_management_root"] = {
+    "title": "📋 Order Management — what would you like to do?",
+    "options": [
+        {
+            "label": "🔍 Track an order",
+            "intent": "order_status",
+            "action": "agent",
+            "prompt": "I want to track an existing order.",
+        },
+        {
+            "label": "✏️ Modify an order",
+            "intent": "order_changes",
+            "action": "agent",
+            "prompt": "I want to modify an existing order.",
+        },
+        {
+            "label": "❌ Cancel an order",
+            "intent": "order_cancel",
+            "action": "agent",
+            "prompt": "I want to cancel an existing order.",
+        },
+    ],
+}
+
 for _menu_name in ("client_root", "active_client_root"):
     for _client_option in MENUS[_menu_name]["options"]:
         if _client_option.get("intent") == "new_order":
             _client_option.update({
                 "action": "content",
                 "next": "client_order_root",
+                "blocks": [],
+            })
+        if _client_option.get("intent") == "order_management":
+            _client_option.update({
+                "action": "content",
+                "next": "active_client_order_management_root",
                 "blocks": [],
             })
 

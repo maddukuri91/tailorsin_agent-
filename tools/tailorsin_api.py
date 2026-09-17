@@ -290,3 +290,77 @@ def human_handover(
 
     return response.json()
 
+def get_order_status(mobile: str):
+    """
+    Get the current status of an order for a client by mobile number.
+    Uses GET request with mobile as query parameter.
+    """
+
+    url = f"{BASE_URL}/orderstatus.php"
+
+    params = {
+        "mobile": mobile
+    }
+
+    response = requests.get(
+        url,
+        params=params,
+        timeout=30
+    )
+
+    response.raise_for_status()
+
+    return response.json()
+
+
+def cancel_order(mobile: str, order_id: int, reason: str):
+    """
+    Cancel an existing order for a client.
+    Sends mobile, order_id, and reason to the CRM.
+    """
+
+    url = f"{BASE_URL}/cancelorder.php"
+
+    payload = {
+        "mobile": mobile,
+        "order_id": order_id,
+        "reason": reason
+    }
+
+    response = requests.post(
+        url,
+        json=payload,
+        timeout=30
+    )
+
+    response.raise_for_status()
+
+    return response.json()
+
+
+def modify_order(mobile: str, order_id: int, comment: str):
+    """
+    Modify an existing order for a client.
+    Sends mobile, order_id, and comment (modification request) to the CRM.
+    Uses GET request with parameters as query string.
+    """
+
+    url = f"{BASE_URL}/modifyorder.php"
+
+    payload = {
+        "mobile": mobile,
+        "order_id": order_id,
+        "comment": comment
+    }
+
+    response = requests.get(
+        url,
+        params=payload,
+        timeout=30
+    )
+
+    response.raise_for_status()
+
+    return response.json()
+
+

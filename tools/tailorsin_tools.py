@@ -13,6 +13,9 @@ from tools.tailorsin_api import (
     schedule_pickup as api_schedule_pickup,
     ship_fabric_to_store as api_ship_fabric_to_store,
     human_handover as api_human_handover,
+    get_order_status as api_get_order_status,
+    cancel_order as api_cancel_order,
+    modify_order as api_modify_order,
 )
 
 
@@ -201,3 +204,54 @@ def human_handover(mobile: str):
     """
 
     return api_human_handover(mobile=mobile)
+
+
+@tool
+def get_order_status(mobile: str):
+    """
+    Get the current status of an order for a customer.
+
+    - mobile: the customer's mobile number
+
+    Returns the order status from the CRM.
+    """
+
+    return api_get_order_status(mobile=mobile)
+
+
+@tool
+def cancel_order(mobile: str, order_id: int, reason: str):
+    """
+    Cancel an existing order for a customer.
+
+    - mobile: the customer's mobile number
+    - order_id: the ID of the order to cancel
+    - reason: the reason for cancellation (e.g. 'Changed my mind')
+
+    Returns the cancellation result from the CRM.
+    """
+
+    return api_cancel_order(
+        mobile=mobile,
+        order_id=order_id,
+        reason=reason
+    )
+
+
+@tool
+def modify_order(mobile: str, order_id: int, comment: str):
+    """
+    Modify an existing order for a customer.
+
+    - mobile: the customer's mobile number
+    - order_id: the ID of the order to modify
+    - comment: the modification request (e.g. 'Please make the sleeves half instead of full')
+
+    Returns the modification result from the CRM.
+    """
+
+    return api_modify_order(
+        mobile=mobile,
+        order_id=order_id,
+        comment=comment
+    )

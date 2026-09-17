@@ -8,6 +8,9 @@ from tools.tailorsin_tools import (
     add_client_address,
     schedule_pickup,
     ship_fabric_to_store,
+    get_order_status,
+    cancel_order,
+    modify_order,
 )
 
 load_dotenv()
@@ -20,6 +23,7 @@ You are the Tailorsin order agent.
 For a scheduled pickup:
 1. If the customer has no saved address, collect address, city and pincode,
    then call add_client_address.
+2. If the customer has a saved address, ask if they want to use it or provide a new one. If they provide a new address, call add_client_address.
 2. After an address is available, collect pickup_date and pickup_time and
    call schedule_pickup. Use the selected address_id from the context.
 
@@ -46,6 +50,9 @@ def order_agent(state: AgentState):
         add_client_address,
         schedule_pickup,
         ship_fabric_to_store,
+        get_order_status,
+        cancel_order,
+        modify_order,
     ]).invoke([context, SystemMessage(content=ORDER_PROMPT), *messages])
 
     calls = getattr(response, "tool_calls", None)
@@ -66,6 +73,9 @@ def order_agent(state: AgentState):
         "add_client_address": ["mobile", "address"],
         "schedule_pickup": ["mobile", "pickup_date", "pickup_time", "address_id"],
         "ship_fabric_to_store": ["mobile", "store_id"],
+        "get_order_status": ["mobile"],
+        "cancel_order": ["mobile", "order_id", "reason"],
+        "modify_order": ["mobile", "order_id", "comment"],
     }.get(name)
     if required is None:
         return {
@@ -104,6 +114,9 @@ def order_agent(state: AgentState):
             "add_client_address": add_client_address.func,
             "schedule_pickup": schedule_pickup.func,
             "ship_fabric_to_store": ship_fabric_to_store.func,
+            "get_order_status": get_order_status.func,
+            "cancel_order": cancel_order.func,
+            "modify_order": modify_order.func,
         },
     )
     updates.pop("args", None)

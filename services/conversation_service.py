@@ -279,6 +279,10 @@ async def _handle_menu_choice(
             "ship_fabric": "order",
             "schedule_pickup": "order",
             "add_address": "order",
+            # Order management (track, cancel, modify existing orders)
+            "order_status": "order_management",
+            "order_changes": "order_management",
+            "order_cancel": "order_management",
         }.get(action.get("intent"))
         return await _run_agent_turn(
             session_id=session_id,
